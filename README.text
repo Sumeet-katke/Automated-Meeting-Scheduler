@@ -1,0 +1,74 @@
+===============================================================================
+                         MEETING SCHEDULER README
+===============================================================================
+
+Script Overview:
+----------------
+The Meeting Scheduler script automates the process of managing calendar schedules 
+and proposing interview timings using the Microsoft Graph API.
+
+Functionalities:
+----------------
+- Calendar Data Retrieval: Fetches calendar data using Microsoft Graph API.
+- Availability Check: Analyzes the availability of an interviewer within a specified timeframe.
+- Schedule Proposal: Proposes a meeting time slot based on availability.
+- Meeting Creation: Creates a meeting event in the calendar using retrieved availability.
+
+Setup Instructions:
+-------------------
+1. Requirements:
+   - Python 3.x
+   - Required libraries: `requests`, `tzlocal`
+
+2. Authorization:
+   - Acquire a valid token from Azure for Microsoft Graph API access and replace 
+     `'get the token from azure when credentials received'` with the obtained token.
+
+3. Configuration:
+   - Ensure proper configuration for timezone mappings in the `get_timezone()` function.
+
+Usage Guide:
+------------
+1. Calendar Data Retrieval:
+   Function: calender_data_func(timezone, from_time, to_time, timeinterval)
+   - timezone: Set the timezone for calendar data retrieval.
+   - from_time: Start time for calendar data retrieval.
+   - to_time: End time for calendar data retrieval.
+   - timeinterval: Define the time interval.
+
+2. Meeting Proposal:
+   Function: MeetingScheduler.proposeInterviewData()
+   - Utilizes retrieved calendar data to propose a meeting time slot based on availability.
+
+3. Error Handling:
+   - Handles external errors with appropriate messages and internal exceptions during meeting creation.
+
+4. Output:
+   - Prints 'Meeting Created' upon successful meeting creation; otherwise, displays error messages.
+
+Advantages:
+------------
+- Automated Scheduling: Streamlines the process of finding and proposing available meeting slots.
+- Customizable: Adjustable timeframes and intervals for meeting proposals.
+- Easy Integration: Utilizes Microsoft Graph API for calendar management.
+
+Warnings:
+----------
+- Token Security: Ensure secure handling of the Azure token to prevent unauthorized access.
+- Error Handling: Handle exceptions and errors appropriately to maintain script stability.
+- Timezone Mapping: Verify timezone mappings in `get_timezone()` function for accurate scheduling.
+
+Code Trace:
+------------
+1. Imports required libraries and sets up necessary configurations.
+2. Defines functions to handle timezone, calendar data, and meeting scheduling.
+3. Initializes the MeetingScheduler class to manage interview scheduling.
+4. Retrieves calendar data using `calender_data_func()` with provided parameters.
+5. Checks the status of the retrieved data.
+6. If the data retrieval is successful:
+    - Initializes a MeetingScheduler object with the retrieved data.
+    - Proposes an interview time slot using `proposeInterviewData()`.
+    - Checks for successful meeting creation.
+7. Prints appropriate messages based on successful or failed meeting creation.
+
+===============================================================================
