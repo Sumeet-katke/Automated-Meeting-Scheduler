@@ -6,9 +6,15 @@ import json
 from datetime import datetime, timedelta
 
 #Authorization data 
-token = 'get the token from azure when credentials recieved'
+token = 'eyJ0eXAiOiJKV1QiLCJub25jZSI6Ilo0VjllWDlnaWRVT3hiTVhaZDJqdFMzQUZvU0g2aThJN3pMMVRJcEZ2WWMiLCJhbGciOiJSUzI1NiIsIng1dCI6IlQxU3QtZExUdnlXUmd4Ql82NzZ1OGtyWFMtSSIsImtpZCI6IlQxU3QtZExUdnlXUmd4Ql82NzZ1OGtyWFMtSSJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC81YjE3YWY4Yy0wZWI1LTRhNDQtYTJkNy01NTk0MzlkZmFlYmEvIiwiaWF0IjoxNzAyNTYyODYxLCJuYmYiOjE3MDI1NjI4NjEsImV4cCI6MTcwMjU2Njc2MSwiYWlvIjoiRTJWZ1lOaGpMc29rbWpiUi90blJMVXNVOXhaRUFRQT0iLCJhcHBfZGlzcGxheW5hbWUiOiJNZWV0aW5nIFNjaGVkdWxlciIsImFwcGlkIjoiMzEwZWJkZWEtZTliOC00ZmM1LTg1NGEtNTA4ZTg4OTI2MjY0IiwiYXBwaWRhY3IiOiIxIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNWIxN2FmOGMtMGViNS00YTQ0LWEyZDctNTU5NDM5ZGZhZWJhLyIsImlkdHlwIjoiYXBwIiwib2lkIjoiOTZhNWFlZWQtZDc2ZC00ZTcwLWE3ZmEtOGM5Njg1ZTU4OTUwIiwicmgiOiIwLkFUMEFqSzhYVzdVT1JFcWkxMVdVT2QtdXVnTUFBQUFBQUFBQXdBQUFBQUFBQUFDaEFBQS4iLCJzdWIiOiI5NmE1YWVlZC1kNzZkLTRlNzAtYTdmYS04Yzk2ODVlNTg5NTAiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiQVMiLCJ0aWQiOiI1YjE3YWY4Yy0wZWI1LTRhNDQtYTJkNy01NTk0MzlkZmFlYmEiLCJ1dGkiOiI4ZFZGd1k4M2trNnNGRGEwSlVwT0FBIiwidmVyIjoiMS4wIiwid2lkcyI6WyIwOTk3YTFkMC0wZDFkLTRhY2ItYjQwOC1kNWNhNzMxMjFlOTAiXSwieG1zX3RjZHQiOjE2OTk4NDk5NzB9.HBDDtqERbczbTS6-CiQ8IlB4VZyPq5iZMnkOQC27vNf1pjEXP0bag4MULHQzYpDNkt5nZ3llinF8NfwQJL3MHZ4LOArulk7LvZboV33jraWS8S7PxmR_6NQgzRrfMj3zwI-S-Awo5RqCuBFwAgTBU-9tF6xB-nF-bpF_jsX3wTlYLCIzbwg4qUCT4C9cbs30VwVVNhlcp90qm1zowW-E4gbRWr-YiBelkJ5V5O0hDmPUmhS-zV8EQ1a9JATgzXmFgL6vuzUNGkBD2OhTYT-PkAKvHaqB21elXI07kSPOE9fu23t8EepKZZQi6vrfi-ZLFHdN7Ys8Jf3roPMP2O0ZPw'
 
-url = f'https://graph.microsoft.com/v1.0/me/calendar/getschedule'
+interviewer_data =  {
+    "mail" : 'sumeet.kumar@thinsil.com',
+    "from_time" : datetime.now(),
+    "to_time" : datetime.now() + timedelta(days=7),
+    "timeInterval" : 15
+}
+url = f'https://graph.microsoft.com/v1.0/users/{interviewer_data['mail']}/calendar/getschedule'
 
 
 #timezone
@@ -30,31 +36,35 @@ def get_timezone():
 
 timezone = get_timezone()
 
-def calender_data_func(from_time, timezone, to_time, timeinterval):
-
+def calender_data_func(from_time, timezone, to_time, timeinterval, mail, token):
+    url = f'https://graph.microsoft.com/v1.0/users/sumeet.kumar@thinsil.com/calendar/getschedule'
+    print(timezone, to_time, from_time, mail)
+    if token:
+        print("True")
     calender_data = {        
-        "Schedules": [{}],
+        "Schedules": [f"{mail}"],
         "StartTime": {
-            "dateTime": f"{from_time.strftime("%Y-%m-%dT%H:%M:%S")}",
+            "dateTime": f"{from_time}",
             "timeZone": f"{timezone}"
         },
         "EndTime": {
-            "dateTime": f"{to_time.strftime("%Y-%m-%dT%H:%M:%S")}",
+            "dateTime": f"{to_time}",
             "timeZone": f"{timezone}"
         },
         "availabilityViewInterval": f"{timeinterval}"
     }
 
     header = {
-        'prefer' :f'outlook.timezone({timezone})',
-        'Authorization' : 'Token',
-        'content-time' : 'applicationjson/'
+        'Prefer' :f'outlook.timezone="{timezone}"',
+        'Authorization': f'Bearer {token}',  
+        'Content-Type' : 'application/json'
         }
 
     # data = calender_data
 
-    response = requests.post(url, headers=header, data=calender_data)
+    response = requests.post(url, headers=header, data=json.dumps(calender_data))
     return response
+
 
 class MeetingScheduler:
 
@@ -144,12 +154,13 @@ class MeetingScheduler:
         start = vacant_timing[0]
         end= timedelta(hours=1)
         end = start + end
+        timezone = get_timezone()
         
         url = 'https://graph.microsoft.com/v1.0/me/events'
 
         headers = {
-            'Authorization': 'Bearer YOUR_ACCESS_TOKEN',  # Replace 'YOUR_ACCESS_TOKEN' with your actual access token
-            'Prefer': 'outlook.timezone="Pacific Standard Time"',
+            'Authorization': f'Bearer  {token}',  # Replace 'YOUR_ACCESS_TOKEN' with your actual access token
+            'Prefer': f'outlook.timezone= "{timezone}"',
             'Content-type': 'application/json'
         }
 
@@ -168,13 +179,13 @@ class MeetingScheduler:
                 "timeZone": "Pacific Standard Time"
             },
             "location": {
-                "displayName": "Cordova conference room"
+                "displayName": "Online"
             },
             "attendees": [
                 {
                     "emailAddress": {
-                        "address": "AdeleV@contoso.OnMicrosoft.com",
-                        "name": "Adele Vance"
+                        "address": "snkatke9874@gmail.com",
+                        "name": "Sumeet Katke"
                     },
                     "type": "required"
                 }
@@ -189,18 +200,18 @@ class MeetingScheduler:
 
 
 
-interviewer_data =  {
-    "mail" : 'interviewer@outlook.com',
-    "from_time" : datetime.now(),
-    "to_time" : datetime.now() + timedelta(days=7),
-    "timeInterval" : 'define time interval'
-}
 
 print(interviewer_data['to_time'].strftime("%Y-%m-%dT%H:%M:%S"))
 
-interview_response =  calender_data_func(timezone=get_timezone(), from_time=interviewer_data['from_time'], to_time=interviewer_data['to_time'],timeinterval=interviewer_data['from_time'], )
+interview_response =  calender_data_func(mail= interviewer_data['mail'],
+                                        timezone=get_timezone(),
+                                        from_time=interviewer_data['from_time'],
+                                        to_time=interviewer_data['to_time'],
+                                        timeinterval=interviewer_data['timeInterval'], 
+                                        token=token
+                                        )
 
-
+"""
 if interview_response.status_code == 200:
     try: 
         meetingcreate = MeetingScheduler(interview_response)
@@ -214,5 +225,8 @@ if interview_response.status_code == 200:
 else:
     print('External error')
 
-inst = MeetingScheduler(interview_response)
-inst.check_schedule()
+# inst = MeetingScheduler(interview_response)
+# inst.check_schedule()
+"""
+print(interview_response.status_code) 
+print(interview_response.text)
