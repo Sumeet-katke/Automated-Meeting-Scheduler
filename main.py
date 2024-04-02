@@ -5,16 +5,38 @@ import requests
 import json
 from datetime import datetime, timedelta
 
-#Authorization data 
-token = 'eyJ0eXAiOiJKV1QiLCJub25jZSI6Ilo0VjllWDlnaWRVT3hiTVhaZDJqdFMzQUZvU0g2aThJN3pMMVRJcEZ2WWMiLCJhbGciOiJSUzI1NiIsIng1dCI6IlQxU3QtZExUdnlXUmd4Ql82NzZ1OGtyWFMtSSIsImtpZCI6IlQxU3QtZExUdnlXUmd4Ql82NzZ1OGtyWFMtSSJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC81YjE3YWY4Yy0wZWI1LTRhNDQtYTJkNy01NTk0MzlkZmFlYmEvIiwiaWF0IjoxNzAyNTYyODYxLCJuYmYiOjE3MDI1NjI4NjEsImV4cCI6MTcwMjU2Njc2MSwiYWlvIjoiRTJWZ1lOaGpMc29rbWpiUi90blJMVXNVOXhaRUFRQT0iLCJhcHBfZGlzcGxheW5hbWUiOiJNZWV0aW5nIFNjaGVkdWxlciIsImFwcGlkIjoiMzEwZWJkZWEtZTliOC00ZmM1LTg1NGEtNTA4ZTg4OTI2MjY0IiwiYXBwaWRhY3IiOiIxIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvNWIxN2FmOGMtMGViNS00YTQ0LWEyZDctNTU5NDM5ZGZhZWJhLyIsImlkdHlwIjoiYXBwIiwib2lkIjoiOTZhNWFlZWQtZDc2ZC00ZTcwLWE3ZmEtOGM5Njg1ZTU4OTUwIiwicmgiOiIwLkFUMEFqSzhYVzdVT1JFcWkxMVdVT2QtdXVnTUFBQUFBQUFBQXdBQUFBQUFBQUFDaEFBQS4iLCJzdWIiOiI5NmE1YWVlZC1kNzZkLTRlNzAtYTdmYS04Yzk2ODVlNTg5NTAiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiQVMiLCJ0aWQiOiI1YjE3YWY4Yy0wZWI1LTRhNDQtYTJkNy01NTk0MzlkZmFlYmEiLCJ1dGkiOiI4ZFZGd1k4M2trNnNGRGEwSlVwT0FBIiwidmVyIjoiMS4wIiwid2lkcyI6WyIwOTk3YTFkMC0wZDFkLTRhY2ItYjQwOC1kNWNhNzMxMjFlOTAiXSwieG1zX3RjZHQiOjE2OTk4NDk5NzB9.HBDDtqERbczbTS6-CiQ8IlB4VZyPq5iZMnkOQC27vNf1pjEXP0bag4MULHQzYpDNkt5nZ3llinF8NfwQJL3MHZ4LOArulk7LvZboV33jraWS8S7PxmR_6NQgzRrfMj3zwI-S-Awo5RqCuBFwAgTBU-9tF6xB-nF-bpF_jsX3wTlYLCIzbwg4qUCT4C9cbs30VwVVNhlcp90qm1zowW-E4gbRWr-YiBelkJ5V5O0hDmPUmhS-zV8EQ1a9JATgzXmFgL6vuzUNGkBD2OhTYT-PkAKvHaqB21elXI07kSPOE9fu23t8EepKZZQi6vrfi-ZLFHdN7Ys8Jf3roPMP2O0ZPw'
 
 interviewer_data =  {
     "mail" : 'sumeet.kumar@thinsil.com',
     "from_time" : datetime.now(),
     "to_time" : datetime.now() + timedelta(days=7),
-    "timeInterval" : 15
+    "timeInterval" : 60
 }
 url = f'https://graph.microsoft.com/v1.0/users/{interviewer_data['mail']}/calendar/getschedule'
+
+#Getting token
+def get_access_token(client_id='310ebdea-e9b8-4fc5-854a-508e88926264',
+                     client_secret='3PF8Q~rnFlpJevaeae.zsL666YlHzQ3e_VpTWdnE',
+                     tenant_id='5b17af8c-0eb5-4a44-a2d7-559439dfaeba'):
+    token_url = f'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token'
+    token_data = {
+        'grant_type': 'client_credentials',
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'scope': 'https://graph.microsoft.com/.default'
+    }
+
+    token_response = requests.post(token_url, data=token_data)
+    if token_response.status_code == 200:
+        access_token = token_response.json().get('access_token')
+        print("Token Accessed successfully")
+        return access_token
+    else:
+        print("Failed to obtain access token:", token_response.text)
+        return None
+
+# Usage:
+token = get_access_token()
 
 
 #timezone
@@ -23,7 +45,7 @@ def get_timezone():
     timezone_name = get_localzone()
 
     timezone_abbreviations = {
-        'Asia/Calcutta': 'Indian Standard Time',  # Indian Standard Time
+        'Asia/Calcutta': 'India Standard Time',   # Indian Standard Time
         'America/New_York': 'Eastern Standard Time',  # Eastern Standard Time (USA)
         'America/Los_Angeles': 'Pacific Standard Time',  # Pacific Standard Time (USA)
         'Europe/London': 'Greenwich Mean Time',  # Greenwich Mean Time
@@ -37,10 +59,7 @@ def get_timezone():
 timezone = get_timezone()
 
 def calender_data_func(from_time, timezone, to_time, timeinterval, mail, token):
-    url = f'https://graph.microsoft.com/v1.0/users/sumeet.kumar@thinsil.com/calendar/getschedule'
-    print(timezone, to_time, from_time, mail)
-    if token:
-        print("True")
+    url = f'https://graph.microsoft.com/v1.0/users/{interviewer_data["mail"]}/calendar/getschedule'
     calender_data = {        
         "Schedules": [f"{mail}"],
         "StartTime": {
@@ -64,7 +83,6 @@ def calender_data_func(from_time, timezone, to_time, timeinterval, mail, token):
 
     response = requests.post(url, headers=header, data=json.dumps(calender_data))
     return response
-
 
 class MeetingScheduler:
 
@@ -139,24 +157,23 @@ class MeetingScheduler:
         
             current_date += timedelta(days=1)
         day = list(sorted(set(day)))
-        print(day)
 
         if len(day) == 5:
 
             return free_timings
         else:
-            current_date = timedelta(days=7)
-            self.check_schedule(day, current_date)
+            current_date = datetime.now() + timedelta(days=7)
+            return self.check_schedule(day, current_date)
 
     def proposeInterviewData(self):
         
         vacant_timing = self.check_schedule()
-        start = vacant_timing[0]
+        start = vacant_timing[0] + timedelta(days=1)
         end= timedelta(hours=1)
         end = start + end
         timezone = get_timezone()
         
-        url = 'https://graph.microsoft.com/v1.0/me/events'
+        url = f'https://graph.microsoft.com/v1.0/users/{interviewer_data["mail"]}/events'
 
         headers = {
             'Authorization': f'Bearer  {token}',  # Replace 'YOUR_ACCESS_TOKEN' with your actual access token
@@ -168,15 +185,15 @@ class MeetingScheduler:
             "subject": "Next Round Interview",
             "body": {
                 "contentType": "HTML",
-                "content": "This is the propoed time"
+                "content": "This is the proposed time"
             },
             "start": {
                 "dateTime": f"{start.strftime('%Y-%m-%dT%H:%M:%S')}",
-                "timeZone": "Pacific Standard Time"
+                "timeZone": f"{timezone}"
             },
             "end": {
                 "dateTime": f"{end.strftime("%Y-%m-%dT%H:%M:%S")}",
-                "timeZone": "Pacific Standard Time"
+                "timeZone": f"{timezone}"
             },
             "location": {
                 "displayName": "Online"
@@ -199,10 +216,6 @@ class MeetingScheduler:
         return response
 
 
-
-
-print(interviewer_data['to_time'].strftime("%Y-%m-%dT%H:%M:%S"))
-
 interview_response =  calender_data_func(mail= interviewer_data['mail'],
                                         timezone=get_timezone(),
                                         from_time=interviewer_data['from_time'],
@@ -210,23 +223,19 @@ interview_response =  calender_data_func(mail= interviewer_data['mail'],
                                         timeinterval=interviewer_data['timeInterval'], 
                                         token=token
                                         )
+data = interview_response.json()
 
-"""
+
 if interview_response.status_code == 200:
     try: 
-        meetingcreate = MeetingScheduler(interview_response)
+        meetingcreate = MeetingScheduler(data)
         event = meetingcreate.proposeInterviewData()
         if event.status_code == 201:
             print('Meeting Created')
         else:
             print("Meeting creation error...")
+            
     except Exception as e:
         print("Internal Error: ", e)
 else:
     print('External error')
-
-# inst = MeetingScheduler(interview_response)
-# inst.check_schedule()
-"""
-print(interview_response.status_code) 
-print(interview_response.text)
